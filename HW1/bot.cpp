@@ -1,47 +1,57 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include "util.h"
-#include "mySocket.h"
-using namespace std;
-int main()
+#include "bot.h"
+bot::bot() 
+    :_userinfo({"MikeTsai","Mike","",""})
 {
-    mySocket skt("irc.rizon.net","6667");
-    char buf[512];
-    fprintf(stderr,"Connecting ...\n");
-    if (skt.connect() < 0) {
-        fprintf(stderr, "Connection error\n");
-        exit(1);
+    _socket.connect(_userinfo);
+    display();
+}
+
+bot::bot(const char* hostname, const char* port)
+    :_socket(hostname,port),
+    _userinfo({"MikeTsai","Mike","",""})
+{
+    _socket.connect(_userinfo);
+    display();
+}
+
+bool bot::getConfig(ifstream& fin) {
+    string buf;
+    getline(fin,buf);
+    size_t n1 = buf.find_first_of('\'');
+    size_t n2 = buf.find_first_of('\'',n1+1);
+    _userinfo.channel = buf.substr(n1+1,n2-n1-1);
+    if (_userinfo.channel.size() == 0)
+        return false;
+    getline(fin,buf);
+    if (buf.size() != 0) {
+        n1 = buf.find_first_of('\'');
+        n2 = buf.find_first_of('\'',n1+1);
+        _userinfo.password = buf.substr(n1+1,n2-n1-1);
     }
-    fprintf(stderr,"testpoint\n");
-    while (skt.read(buf,sizeof(buf)) > 0) {
-        fprintf(stderr, "Read --- %s ---\n",buf);
-        bzero(buf,sizeof(buf));
+    _socket.joinChannel(_userinfo);
+    return true;
+}
+
+void bot::reply(const string& str) const
+{
+    string line = "PRIVMSG " + _userinfo.channel + " " + str + "\r\n";
+    _socket.write(line.c_str(), line.size());
+}
+
+void bot::display() const
+{
+    while(_socket.read(_buf,sizeof(_buf)) > 0) {
+        fprintf(stderr,">>>%s\n",_buf);
+        bzero(_buf,sizeof(_buf));
     }
-    fprintf(stderr,"Join channel\n");
-    ifstream config("config",ios::in);
-    skt.setChannel(config);
-    while (skt.read(buf,sizeof(buf),-1) > 0) {
-        fprintf(stderr,"buf = %s\n", buf);
-        string line(buf);
-        vector<string> tok;
-        splitString(line,tok," ");
-        for (size_t i=0;i<tok.size();++i)
-            cout << "tok[" << i << "] = " << tok[i] << endl;
-        if (tok[0] == "PING"){
-            skt.write("PONG ", 4);
-            skt.write(tok[1].c_str(), tok[1].size());
-        } else {
-            skt.reply(tok[3]);
-        }
-        bzero(buf,sizeof(buf));
+}
+bool bot::handleMsg()
+{
+    while (_socket.read(_buf,sizeof(_buf),-1)) {
+        fprintf(stderr,"buf = %s\n", _buf);
+        string line(_buf);
+        bzero(_buf,sizeof(_buf));
     }
-    // :b03901078!~b03901078@Rizon-C14D6386.csie.ntu.edu.tw PRIVMSG #CN1103 :QAQ
-    // :(NICK)!~(Host) PRIVMSG (CHAN) :(MSG)
+    return true;
+
 }

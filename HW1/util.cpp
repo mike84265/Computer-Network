@@ -31,3 +31,4 @@ void splitString
       n = myStrGetTok(option, token, n, del);
    }
 }
+
