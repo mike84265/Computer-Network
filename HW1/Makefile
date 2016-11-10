@@ -4,7 +4,8 @@ CFLAGS_DBG = -g -Wall -std=c++11 -DDEBUG
 main:
 	make util.o
 	make mySocket.o
-	g++ $(CFLAGS) bot.cpp util.o mySocket.o -o bot
+	make bot.o
+	g++ $(CFLAGS) bot.o util.o mySocket.o main.cpp -o bot
 
 %.o: %.cpp
 	g++ $(CFLAGS) -c -o $@ $<
@@ -16,6 +17,10 @@ debug:
 ctags:
 	@echo "Tagging..."
 	@ctags -R ./
+
+test:
+	make GuessNum.o
+	g++ $(CFLAGS) test.cpp GuessNum.o -o test.out
 
 clean:
 	@rm -f *.o

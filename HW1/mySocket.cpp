@@ -7,15 +7,13 @@
     exit(1); }
 using namespace std;
 
-mySocket::mySocket() : _hostname("irc.freenode.net"), _port(6667),
-    _nick("MikeTsai"), _user("Mike"), _bla("MIKE")
+mySocket::mySocket() : _hostname("irc.freenode.net"), _port(6667)
 {
     initSocket();
 }
 
 mySocket::mySocket(const char* hostname, const char* port) :
-    _hostname(hostname), _port(atoi(port)), 
-    _nick("MikeTsai"), _user("Mike"), _bla("MIKE")
+    _hostname(hostname), _port(atoi(port)) 
 {
     initSocket();
 }
@@ -37,8 +35,9 @@ mySocket::~mySocket()
 {
     this->close();
 }
-int mySocket::connect()
+int mySocket::connect(UserInfo& info)
 {
+    cerr << "Start to connect..." << endl;
     if (::connect(_sockFd, (struct sockaddr*)&_serverAddress, 
        sizeof(_serverAddress)) < 0)
         ERR_EXIT("Connection Error!\n");
@@ -56,8 +55,8 @@ int mySocket::connect()
             #endif
         }
     }
-    string nick = "NICK " + _nick + "\r\n";
-    string user = "USER " + _nick + " " + _hostname + " " + _nick + " :" + _bla + "\r\n";
+    string nick = "NICK " + info.nick + "\r\n";
+    string user = "USER " + info.user + " " + _hostname + " " + info.nick + " :" + info.user + "\r\n";
     cerr << "write nick..." << nick << endl;
     if (this->write(nick.c_str(), nick.size()) < 0)
         ERR_EXIT("Sending Nick Error\n");
@@ -101,20 +100,12 @@ int mySocket::write(const char* buf, size_t len) const
     return ::send(_sockFd, buf, len,0);    
 }
 
-void mySocket::setChannel(ifstream& fin)
+void mySocket::joinChannel(UserInfo& userinfo)
 {
-    string buf;
-    getline(fin,buf);
-    size_t n1 = buf.find_first_of('\'');
-    size_t n2 = buf.find_first_of('\'',n1+1);
-    _channel = buf.substr(n1+1,n2-n1-1);
-    string msg = "JOIN " + _channel;
-    getline(fin,buf);
-    if (buf.size() != 0) {
-        n1 = buf.find_first_of('\'');
-        n2 = buf.find_first_of('\'',n1+1);
-        _password = buf.substr(n1+1,n2-n1-1);
-        msg = msg + " " + _password; 
+    string msg = "JOIN " + userinfo.channel;
+    if (userinfo.password.size() != 0) {
+        msg += " ";
+        msg += userinfo.password;
     }
     msg += "\r\n";
     if (this->write(msg.c_str(), msg.size()) <= 0)
@@ -124,8 +115,3 @@ void mySocket::setChannel(ifstream& fin)
     // Error handling not considered yet.
 }
 
-void mySocket::reply(const string& str) const
-{
-    string line = "PRIVMSG " + _channel + " " + str + "\r\n";
-    this->write(line.c_str(), line.size());
-}
