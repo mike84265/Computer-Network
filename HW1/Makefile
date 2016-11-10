@@ -2,13 +2,16 @@ CFLAGS = -O3 -Wall -std=c++11
 CFLAGS_DBG = -g -Wall -std=c++11 -DDEBUG
 
 main:
-	make util.o
-	make mySocket.o
-	make bot.o
-	g++ $(CFLAGS) bot.o util.o mySocket.o main.cpp -o bot
+	@make util.o
+	@make mySocket.o
+	@make bot.o
+	@make GuessNum.o
+	@echo 'Merging object files...'
+	@g++ $(CFLAGS) GuessNum.o bot.o util.o mySocket.o main.cpp -o bot
 
 %.o: %.cpp
-	g++ $(CFLAGS) -c -o $@ $<
+	@echo 'Compiling $< ...'
+	@g++ $(CFLAGS) -c -o $@ $<
 
 debug:
 	g++ $(CFLAGS_DBG) util.cpp -c -o util.o

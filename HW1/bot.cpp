@@ -55,3 +55,22 @@ bool bot::handleMsg()
     return true;
 
 }
+
+bool bot::isMsg() const
+{
+    return true;
+}
+
+bool bot::isJoin() const
+{
+    return true;
+}
+
+bool bot::isPING() const
+{
+    return true;
+}
+
+string bot::extractMsg() const
+{
+}
