@@ -50,17 +50,6 @@ bool bot::handleMsg()
     while (_socket.read(_buf,sizeof(_buf),-1)) {
         fprintf(stderr,"buf = %s\n", _buf);
         string line(_buf);
-        vector<string> tok;
-        splitString(line,tok," ");
-        for (size_t i=0;i<tok.size();++i)
-            cout << "tok[" << i << "] = " << tok[i] << endl;
-        if (tok[0] == "PING"){
-            _socket.write("PONG ", 4);
-            _socket.write(tok[1].c_str(), tok[1].size());
-            _socket.write("\r\n",2);
-        } else {
-            reply(tok[3]);
-        }
         bzero(_buf,sizeof(_buf));
     }
     return true;
