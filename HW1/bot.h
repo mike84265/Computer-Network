@@ -24,8 +24,6 @@ class bot
  private:
     // Helper functions for handling messages:
     // Reading _buf to make decisions.
-    bool isMsg() const;
-    bool isJoin() const;
     bool isPING() const;
     void extractMsg();
     void initHelpMsg();

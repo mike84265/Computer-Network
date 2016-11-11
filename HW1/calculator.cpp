@@ -4,6 +4,10 @@
 using namespace std;
 double Calculator::operator() (const string& exp)
 {
+    while (!_numbers.empty())
+        _numbers.pop();
+    while (!_operators.empty())
+        _operators.pop();
     size_t start=0, len=0;
     ParseState ps = OPERATOR;
     for (size_t i=0;i<exp.size();++i) {
@@ -96,7 +100,7 @@ double Calculator::operator() (const string& exp)
                     _numbers.push(stod(exp.substr(start,len)));
                 len = 0;
             }
-            while (!_operators.empty() && _operators.top() != '(')
+            while (!_operators.empty())
                 calTop();
             ps = RPAREN;
             break;
@@ -223,7 +227,7 @@ int Calculator::compare(char c1, char c2)
     // () > ^ > */ > +-
     string valOp = "()^*/+-";
     assert(valOp.find_first_of(c1) != string::npos);
-    assert(valOp.find_first_of(c1) != string::npos);
+    assert(valOp.find_first_of(c2) != string::npos);
     switch(c1) {
       case '^':
         if (c2 == '^')
@@ -273,7 +277,7 @@ double Calculator::calTop()
     if (!_numbers.empty())
         n1 = _numbers.top();
     else
-        throw invalid_argument("Parenthesis not paired!");
+        throw invalid_argument("Not enough operators!");
     _numbers.pop();
     switch(op) {
       case '+':

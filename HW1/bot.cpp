@@ -131,9 +131,17 @@ bool bot::handleMsg()
                     string str = string("Invalid input: ") + string(ia.what());
                     reply(str);
                 }
+                reply(to_string(num));
             } // End for handling @cal
             else if (tok == "@help") {
-                tok = _line.msg.substr(n+1,string::npos);
+                if (n == string::npos)
+                    tok = "";
+                else
+                    tok = _line.msg.substr(n+1,string::npos);
+                #ifdef DEBUG
+                cerr << "tok = \"" << tok << "\", size = " << tok.size() 
+                     << ", n = " << n << endl;
+                #endif
                 map<string,string>::iterator it;
                 if (tok.size() == 0)
                     for (it = _help.begin(); it!=_help.end(); ++it)
@@ -150,26 +158,11 @@ bool bot::handleMsg()
 
 }
 
-bool bot::isMsg() const
-{
-    return (strstr(_buf, "PRIVMSG") != NULL);
-}
-
-bool bot::isJoin() const
-{
-    return (strstr(_buf,"JOIN") != NULL && 
-      strstr(_buf,"PRIVMSG") == NULL);
-}
-
 bool bot::isPING() const
 {
     if (strncmp(_buf,"PING",4) == 0) {
         _buf[1] = 'O';
         _socket.write(_buf,strlen(_buf));
-        #ifdef DEBUG
-        size_t n = strlen(_buf);
-        fprintf(stderr,"_buf[-2,-1] = %d %d\n", int(_buf[n-2]), int(_buf[n-1]));
-        #endif
         return true;
     }
     else

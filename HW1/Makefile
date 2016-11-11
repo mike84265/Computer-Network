@@ -1,6 +1,6 @@
 CFLAGS_DBG = -g -Wall -std=c++11 -DDEBUG
-CFLAGS = -g -Wall -std=c++11 -DDEBUG
 CFLAGS = -O3 -Wall -std=c++11
+CFLAGS = -g -Wall -std=c++11 -DDEBUG
 
 main:
 	@make util.o
@@ -32,4 +32,3 @@ test:
 clean:
 	@rm -f *.o
 	@rm bot
-	@rm bot_debug
