@@ -21,7 +21,7 @@ class mySocket
     mySocket(const char*, const char*);
     ~mySocket();
     int connect(UserInfo&);
-    int read(char*,size_t, double timeout=2.5) const;
+    int read(char*,size_t, double timeout=1.2) const;
     int write(const char*, size_t) const;
     void close() { ::close(_sockFd); }
     void joinChannel(UserInfo&);

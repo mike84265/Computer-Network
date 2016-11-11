@@ -1,6 +1,6 @@
 #include "GuessNum.h"
 GuessNum::GuessNum(unsigned range, unsigned initcnt)
-    :_range(range), _remainNum(initcnt), _target(-1), _rnGen()
+    :_range(range), _remainNum(0), _target(-1), _rnGen()
 {}
 
 void GuessNum::init(unsigned range, unsigned initcnt)

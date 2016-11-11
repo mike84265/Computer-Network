@@ -29,13 +29,13 @@ bool bot::getConfig(ifstream& fin) {
         _userinfo.password = buf.substr(n1+1,n2-n1-1);
     }
     _socket.joinChannel(_userinfo);
-    reply("Hello, I'm" + _userinfo.nick);
+    reply("Hello, I'm " + _userinfo.nick);
     return true;
 }
 
 void bot::reply(const string& str) const
 {
-    string line = "PRIVMSG " + _userinfo.channel + " " + str + "\r\n";
+    string line = "PRIVMSG " + _userinfo.channel + " :" + str + "\r\n";
     _socket.write(line.c_str(), line.size());
     cerr << ">>>" << str << endl;
 }
@@ -53,27 +53,42 @@ bool bot::handleMsg()
         fprintf(stderr,">>> %s\n", _buf);
         // string line(_buf);
         if (isPING()) {
-            _buf[1] = 'O';
-            _socket.write(_buf,strlen(_buf));
-            fprintf(stderr,">>> %s\n",_buf);
+            fprintf(stderr,"Pinged... \n");
+            continue;
         }
         extractMsg();
+        #ifdef DEBUG
+        cerr << "nick = " << _line.nick << endl;
+        cerr << "addr = " << _line.address << endl;
+        cerr << "cmd  = " << _line.cmd << endl;
+        fprintf(stderr,"msg = \"%s\", len = %d\n", _line.msg.c_str(), _line.msg.size());
+        #endif
         if (_line.cmd == "JOIN") {
+            if (_line.nick == _userinfo.nick)
+                continue;
             string replyMsg = "Hello " + _line.nick + ", welcome to " + _userinfo.channel;
             replyMsg += ", I'm " + _userinfo.nick;
             reply(replyMsg);
-        } else if (_line.cmd == "PRIVMSG") {
+        } 
+        else if (_line.cmd == "PRIVMSG") {
             size_t n = _line.msg.find_first_of(' ');
             string tok = _line.msg.substr(0,n);
             if (tok == "@repeat") {
                 tok = _line.msg.substr(n+1,string::npos);
                 reply(tok);
             } else if (tok == "@play") {
-                if (_line.msg.substr(n+1,string::npos) == _userinfo.nick)
-                _guessNum.init();
-                reply("Game start! Guess from 1 to 100 in 5 times");
+                if ( (tok = _line.msg.substr(n+1,string::npos)) == _userinfo.nick) {
+                    _guessNum.init();
+                    reply("Game start! Guess from 1 to 100 in 5 times");
+                }
+                #ifdef DEBUG
+                cerr << "tok => \"" << tok << "\"\n";
+                #endif
             } // End for handling @play
             else if (tok == "@guess") {
+                #ifdef DEBUG
+                cerr << "_guessNum => " << _guessNum.getRemainNum() << endl;
+                #endif
                 if (!_guessNum) {
                     tok = _line.msg.substr(n+1,string::npos);
                     int num;
@@ -81,6 +96,7 @@ bool bot::handleMsg()
                     catch (const invalid_argument& ia) {
                         string str = "Invalid input: " + tok;
                         reply(str);
+                        continue;
                     }
                     num = _guessNum.compare(num);
                     if (num == 0) {
@@ -88,16 +104,27 @@ bool bot::handleMsg()
                         _guessNum.clear();
                     } else if (num == GuessNum::OUT_OF_BOUND) {
                         reply("Error! Number out of bound!");
-                        ++_guessNum;
                     } else if (num > 0) {
                         string replyMsg = "Less, ";
                         replyMsg += to_string(_guessNum.getRemainNum()) + " times remains.";
                         reply(replyMsg);
+                        cerr << "Ans = " << _guessNum.getTarget() << endl;
+                        if (_guessNum.getRemainNum() == 0) {
+                            reply("Sorry, you lose");
+                            reply("The answer is " + to_string(_guessNum.getTarget()));
+                        }
                     } else if (num < 0) {
                         string replyMsg = "More, ";
                         replyMsg += to_string(_guessNum.getRemainNum()) + " times remains.";
                         reply(replyMsg);
+                        cerr << "Ans = " << _guessNum.getTarget() << endl;
+                        if (_guessNum.getRemainNum() == 0) {
+                            reply("Sorry, you lose");
+                            reply("The answer is " + to_string(_guessNum.getTarget()));
+                        }
                     }
+                } else {
+                    reply("Error! You must send @play first before guessing");
                 }
             } // End for handling @guess
         }
@@ -120,8 +147,15 @@ bool bot::isJoin() const
 
 bool bot::isPING() const
 {
-    if (strncmp(_buf,"PING",4) == 0)
+    if (strncmp(_buf,"PING",4) == 0) {
+        _buf[1] = 'O';
+        _socket.write(_buf,strlen(_buf));
+        #ifdef DEBUG
+        size_t n = strlen(_buf);
+        fprintf(stderr,"_buf[-2,-1] = %d %d\n", int(_buf[n-2]), int(_buf[n-1]));
+        #endif
         return true;
+    }
     else
         return false;
 }
@@ -143,5 +177,5 @@ void bot::extractMsg()
         return;
     n1 = strbuf.find_first_of(':',++n1);
     n2 = strbuf.find_first_of("\r\n",n1);
-    _line.msg = strbuf.substr(n1+1,n2-n1);
+    _line.msg = strbuf.substr(n1+1,n2-n1-1);
 }

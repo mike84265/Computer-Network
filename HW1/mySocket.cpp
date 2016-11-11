@@ -61,14 +61,32 @@ int mySocket::connect(UserInfo& info)
     if (this->write(nick.c_str(), nick.size()) < 0)
         ERR_EXIT("Sending Nick Error\n");
     bzero(buf,512);
-    this->read(buf,512);
     cerr << nick.c_str() << endl << buf << endl << endl;
+    this->read(buf,512);
+    if (strncmp(buf,"PING",4) == 0) {
+        cerr << "PING..." << endl;
+        cerr << buf << endl;
+        buf[1] = 'O';
+        write(buf,strlen(buf));
+        cerr << buf << endl;
+        write(nick.c_str(), nick.size());
+        cerr << nick << endl;
+    }
     cerr << "write user..." << user << endl;
     if (this->write(user.c_str(), user.size()) < 0)
         ERR_EXIT("Sending User Error\n");
+    cerr << user.c_str() << endl << buf << endl << endl;
     bzero(buf,512);
     this->read(buf,512);
-    cerr << user.c_str() << endl << buf << endl << endl;
+    if (strncmp(buf,"PING",4) == 0) {
+        cerr << "PING..." << endl;
+        cerr << buf << endl;
+        buf[1] = 'O';
+        write(buf,strlen(buf));
+        cerr << buf << endl;
+        write(user.c_str(), user.size());
+        cerr << user << endl;
+    }
     return 0;
 }
 int mySocket::read(char* buf, size_t len, double timeout) const
