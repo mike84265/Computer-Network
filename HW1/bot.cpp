@@ -2,6 +2,7 @@
 bot::bot() 
     :_userinfo({"MikeTsai","Mike","",""})
 {
+    initHelpMsg();
     _socket.connect(_userinfo);
     display();
 }
@@ -10,6 +11,7 @@ bot::bot(const char* hostname, const char* port)
     :_socket(hostname,port),
     _userinfo({"MikeTsai","Mike","",""})
 {
+    initHelpMsg();
     _socket.connect(_userinfo);
     display();
 }
@@ -81,14 +83,8 @@ bool bot::handleMsg()
                     _guessNum.init();
                     reply("Game start! Guess from 1 to 100 in 5 times");
                 }
-                #ifdef DEBUG
-                cerr << "tok => \"" << tok << "\"\n";
-                #endif
             } // End for handling @play
             else if (tok == "@guess") {
-                #ifdef DEBUG
-                cerr << "_guessNum => " << _guessNum.getRemainNum() << endl;
-                #endif
                 if (!_guessNum) {
                     tok = _line.msg.substr(n+1,string::npos);
                     int num;
@@ -127,6 +123,26 @@ bool bot::handleMsg()
                     reply("Error! You must send @play first before guessing");
                 }
             } // End for handling @guess
+            else if (tok == "@cal") {
+                tok = _line.msg.substr(n+1,string::npos);
+                double num;
+                try { num = _calculator(tok); }
+                catch (const invalid_argument& ia) {
+                    string str = string("Invalid input: ") + string(ia.what());
+                    reply(str);
+                }
+            } // End for handling @cal
+            else if (tok == "@help") {
+                tok = _line.msg.substr(n+1,string::npos);
+                map<string,string>::iterator it;
+                if (tok.size() == 0)
+                    for (it = _help.begin(); it!=_help.end(); ++it)
+                        reply(it->second);
+                else if ( (it = _help.find(tok)) != _help.end())
+                    reply(it->second);
+                else
+                    reply("The command is undefined");
+            } // End for handling @help
         }
         bzero(_buf,sizeof(_buf));
     }
@@ -178,4 +194,13 @@ void bot::extractMsg()
     n1 = strbuf.find_first_of(':',++n1);
     n2 = strbuf.find_first_of("\r\n",n1);
     _line.msg = strbuf.substr(n1+1,n2-n1-1);
+}
+
+void bot::initHelpMsg()
+{
+    _help["repeat"] = "@repeat : Repeat the input string.";
+    _help["cal"] = "@cal : Calculate the input formula.";
+    _help["play"] = "@play <botId> : Play the guess-number game with the bot.";
+    _help["guess"] = "@guess <num> : Guess the number in the game.";
+    _help["help"] = "@help : print the help message";
 }

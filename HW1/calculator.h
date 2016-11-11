@@ -10,8 +10,8 @@ enum ParseState {
     OPERATOR,
     INTEGER,
     FLOAT,
-    LPARAN,
-    RPARAN
+    LPAREN,
+    RPAREN
 };
 class Calculator
 {
@@ -22,11 +22,14 @@ class Calculator
     void parse(const string& exp, vector<double>& ret, vector<char>& op);
  private:
     bool isValid(char c);
+    int compare(char c1, char c2);
+    double calTop();
 
     // Member variables:
     const string                _validCh;
     string                      _exp;
     stack<double>               _numbers;
     stack<char>                 _operators;
+    stack<char>                 _parenthesis;
 };
 #endif
