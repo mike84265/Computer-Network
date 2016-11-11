@@ -17,6 +17,16 @@ typedef struct
     string channel;
     string password;
 } UserInfo;
+class Line
+{
+ public:
+    string nick;
+    string address;
+    string cmd;
+    string msg;
+    string exp;
+    void clear();
+};
 string getHost(const char*);
 size_t myStrGetTok(const string& str, string& tok, size_t pos = 0,
             const char* del = " ");

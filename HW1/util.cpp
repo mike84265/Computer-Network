@@ -32,3 +32,11 @@ void splitString
    }
 }
 
+void Line::clear()
+{
+    nick.clear();
+    address.clear();
+    cmd.clear();
+    msg.clear();
+    exp.clear();
+}

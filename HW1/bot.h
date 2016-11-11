@@ -25,10 +25,11 @@ class bot
     bool isMsg() const;
     bool isJoin() const;
     bool isPING() const;
-    string extractMsg() const;
+    void extractMsg();
     // Member variables:
     mySocket                _socket;
     UserInfo                _userinfo;
+    Line                    _line;
     mutable char            _buf[1024];
     GuessNum                _guessNum; 
 };

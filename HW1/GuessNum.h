@@ -15,12 +15,14 @@ class GuessNum
     GuessNum(unsigned range=RANGE, unsigned initcnt=INITCNT);
     void init(unsigned range=RANGE, unsigned initcnt=INITCNT);
     int compare(int);
-    bool operator!() { return (_remainNum != 0); }
+    bool operator!() { return (_remainNum > 0); }
     const int getTarget() const { return _target; }
     const int getRemainNum() const { return _remainNum; }
+    void clear() { _remainNum = 0; }
+    GuessNum& operator++() { ++_remainNum; return *this; }
     // const for error code:
-    const int OUT_OF_BOUND = INT_MAX;
-    const int REMAIN_ZERO = INT_MAX-1;
+    static const int OUT_OF_BOUND = INT_MAX;
+    static const int REMAIN_ZERO = INT_MAX-1;
   private:
     int                 _range;
     int                 _remainNum;
