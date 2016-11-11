@@ -40,3 +40,4 @@ void Line::clear()
     msg.clear();
     exp.clear();
 }
+
