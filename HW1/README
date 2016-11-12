@@ -1,0 +1,19 @@
+Compile:
+Type "make" in the terminal.
+
+Change Nick of the bot:
+The nick is passed into the bot in main.cpp
+If you need to change the nick of the bot, change that part in main.cpp.
+
+Channel to join:
+Channel information is stored in the file "config".
+The bot will read this file to get the channel information.
+This file must exist.
+
+Execute:
+Execute the program "bot".
+The bot will automatically connect to the irc and channel provided.
+
+Functions provided:
+@repeat, @play, @guess, @cal, @help.
+You can type @help in the irc channel to ask the bot for further information.
