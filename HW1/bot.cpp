@@ -72,11 +72,17 @@ bool bot::handleMsg()
                 reply(tok);
             } else if (tok == "@play") {
                 if ( (tok = _line.msg.substr(n+1,string::npos)) == _userinfo.nick) {
+                    if (!_guessNum) {
+                        reply("Please wait for " + _line.nick + " finish the game.");
+                        continue;
+                    }
                     _guessNum.init();
+                    _intUser = _line.nick;
                     reply("Game start! Guess from 1 to 100 in 5 times");
                 }
             } // End for handling @play
             else if (tok == "@guess") {
+                if (_intUser != _line.nick) continue; 
                 if (!_guessNum) {
                     tok = _line.msg.substr(n+1,string::npos);
                     int num;

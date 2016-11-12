@@ -31,6 +31,7 @@ class bot
     mySocket                _socket;
     UserInfo                _userinfo;
     Line                    _line;
+    string                  _intUser;
     mutable char            _buf[1024];
     GuessNum                _guessNum; 
     Calculator              _calculator;

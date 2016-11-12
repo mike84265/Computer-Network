@@ -13,7 +13,7 @@
 using namespace std;
 int main()
 {
-    bot bot("irc.rizon.net","6667");
+    bot bot("irc.freenode.net","6667");
     bot.display();
     fprintf(stderr,"Join channel\n");
     ifstream config("config",ios::in);
