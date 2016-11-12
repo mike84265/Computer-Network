@@ -123,7 +123,10 @@ double Calculator::operator() (const string& exp)
         }
         calTop();
     }
-    return _numbers.top();    
+    if (_numbers.empty()) {
+        throw invalid_argument("No valid numbers provided");
+    } else
+        return _numbers.top();
 }
 
 Calculator::~Calculator()
@@ -277,7 +280,7 @@ double Calculator::calTop()
     if (!_numbers.empty())
         n1 = _numbers.top();
     else
-        throw invalid_argument("Not enough operators!");
+        throw invalid_argument("Not enough numbers given!");
     _numbers.pop();
     switch(op) {
       case '+':

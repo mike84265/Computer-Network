@@ -1,15 +1,7 @@
 #include "bot.h"
-bot::bot() 
-    :_userinfo({"MikeTsai","Mike","",""})
-{
-    initHelpMsg();
-    _socket.connect(_userinfo);
-    display();
-}
-
-bot::bot(const char* hostname, const char* port)
+bot::bot(const char* hostname, const char* port, const char* nick, const char* user)
     :_socket(hostname,port),
-    _userinfo({"MikeTsai","Mike","",""})
+    _userinfo({nick,user,"",""})
 {
     initHelpMsg();
     _socket.connect(_userinfo);
@@ -88,36 +80,32 @@ bool bot::handleMsg()
                 if (!_guessNum) {
                     tok = _line.msg.substr(n+1,string::npos);
                     int num;
-                    try { num = stoi(tok); }
+                    try { num = stoi(tok); num = _guessNum.compare(num); }
                     catch (const invalid_argument& ia) {
                         string str = "Invalid input: " + tok;
                         reply(str);
                         continue;
+                    } catch (const out_of_range& err) {
+                        string str = "Out of range: " + string(err.what());
+                        reply(str);
+                        continue;
                     }
-                    num = _guessNum.compare(num);
                     if (num == 0) {
                         reply("Correct!");
                         _guessNum.clear();
-                    } else if (num == GuessNum::OUT_OF_BOUND) {
-                        reply("Error! Number out of bound!");
+                    } else if ( _guessNum.getRemainNum() == 0) {
+                        reply("Sorry, you lose");
+                        reply("The answer is " + to_string(_guessNum.getTarget()));
                     } else if (num > 0) {
                         string replyMsg = "Less, ";
                         replyMsg += to_string(_guessNum.getRemainNum()) + " times remains.";
                         reply(replyMsg);
                         cerr << "Ans = " << _guessNum.getTarget() << endl;
-                        if (_guessNum.getRemainNum() == 0) {
-                            reply("Sorry, you lose");
-                            reply("The answer is " + to_string(_guessNum.getTarget()));
-                        }
                     } else if (num < 0) {
                         string replyMsg = "More, ";
                         replyMsg += to_string(_guessNum.getRemainNum()) + " times remains.";
                         reply(replyMsg);
                         cerr << "Ans = " << _guessNum.getTarget() << endl;
-                        if (_guessNum.getRemainNum() == 0) {
-                            reply("Sorry, you lose");
-                            reply("The answer is " + to_string(_guessNum.getTarget()));
-                        }
                     }
                 } else {
                     reply("Error! You must send @play first before guessing");
@@ -126,12 +114,14 @@ bool bot::handleMsg()
             else if (tok == "@cal") {
                 tok = _line.msg.substr(n+1,string::npos);
                 double num;
-                try { num = _calculator(tok); }
+                try { 
+                    num = _calculator(tok); 
+                    reply(to_string(num));
+                }
                 catch (const invalid_argument& ia) {
                     string str = string("Invalid input: ") + string(ia.what());
                     reply(str);
                 }
-                reply(to_string(num));
             } // End for handling @cal
             else if (tok == "@help") {
                 if (n == string::npos)

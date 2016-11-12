@@ -19,10 +19,6 @@ class GuessNum
     const int getTarget() const { return _target; }
     const int getRemainNum() const { return _remainNum; }
     void clear() { _remainNum = 0; }
-    GuessNum& operator++() { ++_remainNum; return *this; }
-    // const for error code:
-    static const int OUT_OF_BOUND = INT_MAX;
-    static const int REMAIN_ZERO = INT_MAX-1;
   private:
     int                 _range;
     int                 _remainNum;

@@ -1,6 +1,6 @@
 CFLAGS_DBG = -g -Wall -std=c++11 -DDEBUG
-CFLAGS = -O3 -Wall -std=c++11
 CFLAGS = -g -Wall -std=c++11 -DDEBUG
+CFLAGS = -O3 -Wall -std=c++11
 
 main:
 	@make util.o
@@ -26,8 +26,8 @@ ctags:
 	@ctags -R ./
 
 test:
-	make calculator.o
-	g++ $(CFLAGS) test4.cpp calculator.o -o test4.out
+	make GuessNum.o 
+	g++ $(CFLAGS) test.cpp GuessNum.o -o test.out
 
 clean:
 	@rm -f *.o

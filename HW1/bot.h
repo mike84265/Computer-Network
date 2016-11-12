@@ -14,8 +14,8 @@ using namespace std;
 class bot
 {
  public:
-    bot();
-    bot(const char* hostname, const char* port);
+    bot(const char* hostname="irc.freenode.net", const char* port="6667",
+        const char* nick="MikeTsai", const char* user="Mike");
     void setInfo(const string& nick, const string& user);
     bool getConfig(ifstream& fin);
     void reply(const string& str) const;
