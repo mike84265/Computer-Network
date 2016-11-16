@@ -25,7 +25,8 @@ double Calculator::operator() (const string& exp)
                 ps = INTEGER;
                 start = i;
                 len = 0;
-            }
+            } else if (len == 0)
+               throw invalid_argument("Entering two consecutive numbers without operator is not allowed!");
             ++len;
             break;
           case '.':
@@ -90,7 +91,9 @@ double Calculator::operator() (const string& exp)
                 if (len > 0)
                     _numbers.push(stod(exp.substr(start,len)));
                 len = 0;
-            }
+                _operators.push('*');
+            } else if (ps == RPAREN)
+                _operators.push('*');
             ps = LPAREN;
             _operators.push(exp[i]);
             break;
@@ -100,8 +103,12 @@ double Calculator::operator() (const string& exp)
                     _numbers.push(stod(exp.substr(start,len)));
                 len = 0;
             }
-            while (!_operators.empty())
+            while (!_operators.empty() && _operators.top() != '(')
                 calTop();
+            if (_operators.empty() || _operators.top() != '(')
+                throw invalid_argument("Parenthesis not paired!");
+            else
+                _operators.pop();
             ps = RPAREN;
             break;
           default:
@@ -125,6 +132,8 @@ double Calculator::operator() (const string& exp)
     }
     if (_numbers.empty()) {
         throw invalid_argument("No valid numbers provided");
+    } else if (_numbers.size() > 1) {
+        throw invalid_argument("Error in numbers of operator!");
     } else
         return _numbers.top();
 }

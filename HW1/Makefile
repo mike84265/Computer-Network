@@ -26,8 +26,8 @@ ctags:
 	@ctags -R ./
 
 test:
-	make GuessNum.o 
-	g++ $(CFLAGS) test.cpp GuessNum.o -o test.out
+	make calculator.o 
+	g++ $(CFLAGS) test4.cpp calculator.o -o test4.out
 
 clean:
 	@rm -f *.o
