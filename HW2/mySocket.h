@@ -13,10 +13,9 @@ class myServer
    myServer();
    myServer(const char* port);
    ~myServer();
-   int read(char* buf, size_t len, double timeout=1.5) const;
+   int read(char* buf, size_t len, double timeout=5) const;
    int write(const char* buf, size_t len) const;
    void initSocket();
-   int accept();
    void close() { ::close(_listenFd); }
  private:
    // Socket:

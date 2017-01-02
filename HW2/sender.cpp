@@ -29,6 +29,8 @@ int main(int argc, char** argv)
    while ( (nbytes = read(fd, buf, sizeof(buf))) > 0) {
       client.write(buf, nbytes);
       printf("Sending %d bytes to agent\n", nbytes);
+      client.read(buf,sizeof(buf));
+      printf("Getting %s from server\n", buf);
    }
    client.write(buf,0);
 }

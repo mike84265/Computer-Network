@@ -28,6 +28,7 @@ int main(int argc, char** argv)
    assert(client.read(buf,sizeof(buf)) >= 0);
    while ( (nbytes = client.read(buf, sizeof(buf))) > 0) {
       write(fd, buf, nbytes);
+      client.write("ACK",4);
       printf("Receiving %d bytes from agent\n", nbytes);
    }
 }

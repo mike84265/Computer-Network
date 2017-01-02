@@ -1,17 +1,24 @@
+CFLAGS = -std=c++11 -Wall -g -DDEBUG
 CFLAGS = -std=c++11 -Wall -O3
-CFLAGS = -std=c++11 -Wall -g
 CXX = g++
 
 main:
-	@make mySocket.o
-	@echo 'Compiling server ...'
-	@$(CXX) $(CFLAGS) server.cpp mySocket.o -o server.out
-	@echo 'Compiling client ...'
-	@$(CXX) $(CFLAGS) client.cpp mySocket.o -o client.out
+	@make socket 
+	@make sender.out
+	@make receiver.out
+	@make server.out
 
-%.o: %.cpp
+socket:
+	@echo 'Compiling mySocket ...'
+	@$(CXX) $(CFLAGS) -c -o mySocket.o mySocket.cpp
+
+%.o: %.cpp 
 	@echo 'Compiling $< ...'
-	@g++ $(CFLAGS) -c -o $@ $<
+	@g++ $(CFLAGS) -c -o $@ $< mySocket.o
+
+%.out: %.cpp 
+	@echo 'Compiling $< ...'
+	@g++ $(CFLAGS)  -o $@ $< mySocket.o 
 
 clean:
 	@rm -f *.o *.out
