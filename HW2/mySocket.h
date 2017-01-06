@@ -54,7 +54,8 @@ class myClient
 
 typedef struct
 {
-   int num;
+   short num;
+   short nbytes;
    char buf[PACKET_SIZE];
 } Data;
 

@@ -38,8 +38,7 @@ int main(int argc, char** argv)
          printf("send\tACK\tFINAL\n");
          int i;
          for (i=0;i<buffer.size()-1;++i)
-            write(fd,buffer[i].buf,PACKET_SIZE);
-         write(fd,buffer[i].buf,strlen(buffer[i].buf));
+            write(fd,buffer[i].buf,buffer[i].nbytes);
          return 0;
       }
       switch(buffer.push(data)) {
@@ -57,10 +56,12 @@ int main(int argc, char** argv)
          break;
        case -2: // Buffer overflow
          printf("drop\tdata\t#%d\n",data.num);
-         for (int i=0;i<buffer.size();++i)
-            write(fd,buffer[i].buf,PACKET_SIZE);
-         buffer.clear();
-         printf("flush\n");
+         if (buffer.full()) {
+            for (int i=0;i<buffer.size();++i)
+               write(fd,buffer[i].buf,PACKET_SIZE);
+            buffer.clear();
+            printf("flush\n");
+         }
       }
    }
 }

@@ -33,8 +33,8 @@ int main(int argc, char** argv)
    while(1) {
       for (i=0;i<winSize;++i) {
          nbytes = read(fd, data.buf, sizeof(data.buf));
-         if (nbytes < sizeof(data.buf))
-            data.buf[nbytes] = '\0';
+         printf("nbytes = %d\n",nbytes);
+         data.nbytes = nbytes;
          data.num = num++; 
          client.write((char*)&data, nbytes + sizeof(int));
          printf("send\tdata\t#%d\twinSize=%d\n",data.num,winSize);
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
       }
       bool loss = false;
       for (i=0;i<winSize;++i) {
-         if ( (nbytes = client.read((char*)&data,sizeof(data),1.0)) > 0) {
+         if ( (nbytes = client.read((char*)&data,sizeof(data),0.5)) > 0) {
             printf("recv\tACK\t#%d\n", data.num);
             if (data.num == oldestPKG ) {
                // Normal transmission
@@ -64,14 +64,14 @@ int main(int argc, char** argv)
       }
       if (!loss) {
          winSize = (winSize >= threshold)? winSize+1 : winSize*2;
+         if (final)
+            break;
       } else {
          threshold = (winSize > 1)? (winSize / 2) : 1;
          winSize = 1;
          lseek(fd,oldestPKG * PACKET_SIZE,SEEK_SET);
          num = oldestPKG;
       }
-      if (final)
-         break;
    }
    data.num = -1;
    strcpy(data.buf,"FINAL");
