@@ -30,13 +30,17 @@ int main(int argc, char** argv)
    client.write(buf,strlen(buf));
    assert(client.read(buf,sizeof(buf),-1) >= 0);
    int num = 0, i=0, final=0;
+   bool loss = false;
    while(1) {
       for (i=0;i<winSize;++i) {
          nbytes = read(fd, data.buf, sizeof(data.buf));
          data.nbytes = nbytes;
          data.num = num++; 
          client.write((char*)&data, nbytes + sizeof(int));
-         printf("send\tdata\t#%d\twinSize=%d\n",data.num,winSize);
+         if (!loss)
+            printf("send\tdata\t#%d\twinSize=%d\n",data.num,winSize);
+         else  
+            printf("resnd\tdata\t#%d\twinSize=%d\n",data.num,winSize);
          if (nbytes <= 0) {
             winSize = i+1;
             printf("final, winSize changed to %d\n",winSize);
@@ -44,7 +48,7 @@ int main(int argc, char** argv)
             break;
          }
       }
-      bool loss = false;
+      loss = false;
       for (i=0;i<winSize;++i) {
          if ( (nbytes = client.read((char*)&data,sizeof(data),0.5)) > 0) {
             printf("recv\tACK\t#%d\n", data.num);

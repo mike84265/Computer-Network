@@ -47,14 +47,12 @@ int main(int argc, char** argv)
          client.write((char*)&data,sizeof(data));
          printf("recv\tdata\t#%d\n",data.num);
          printf("send\tACK\t#%d\n",data.num);
-         printf("size = %d\n",buffer.size());
          break;
        case -1: // Repeat PKG
          sprintf(data.buf,"ACK %d", data.num);
          client.write((char*)&data,sizeof(data));
          printf("ignr\tdata\t#%d\n",data.num);
          printf("send\tACK\t#%d\n",data.num);
-         printf("size = %d\n",buffer.size());
          break;
        case -2: // Buffer overflow
          printf("drop\tdata\t#%d\n",data.num);
