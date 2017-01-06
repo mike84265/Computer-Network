@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#define BUFSIZE 128
+
 class myServer
 {
  public:
@@ -46,3 +48,9 @@ class myClient
    int                     _port;
    struct hostent*         _hp;
 };
+
+typedef struct
+{
+   int num;
+   char buf[BUFSIZE];
+} Data;

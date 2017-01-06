@@ -6,11 +6,10 @@
 #include <assert.h>
 #include <string.h>
 using namespace std;
-#define BUFSIZE 128
 int main(int argc, char** argv)
 {
    if (argc < 4) {
-      fprintf(stderr,"Usage: %s hostname port filename", argv[0]);
+      fprintf(stderr,"Usage: %s <hostname> <port> <filename>", argv[0]);
       exit(1);
    }
 
@@ -23,12 +22,15 @@ int main(int argc, char** argv)
 
    int nbytes;
    char buf[BUFSIZE];
+   Data data;
    strcpy(buf, "Hello Server\n");
    client.write(buf,strlen(buf));
    assert(client.read(buf,sizeof(buf)) >= 0);
-   while ( (nbytes = client.read(buf, sizeof(buf))) > 0) {
-      write(fd, buf, nbytes);
-      client.write("ACK",4);
-      printf("Receiving %d bytes from agent\n", nbytes);
+   while ( (nbytes = client.read((char*)&data, sizeof(data))) > 0) {
+      write(fd, data.buf, nbytes-sizeof(int));
+      sprintf(data.buf,"ACK %d", data.num);
+      client.write((char*)&data,sizeof(data));
+      printf("recv\tdata\t#%d\n",data.num);
+      printf("send\tACK\t#%d\n",data.num);
    }
 }
