@@ -33,6 +33,8 @@ int main(int argc, char** argv)
    while(1) {
       for (i=0;i<winSize;++i) {
          nbytes = read(fd, data.buf, sizeof(data.buf));
+         if (nbytes < sizeof(data.buf))
+            data.buf[nbytes] = '\0';
          data.num = num++; 
          client.write((char*)&data, nbytes + sizeof(int));
          printf("send\tdata\t#%d\twinSize=%d\n",data.num,winSize);
@@ -47,9 +49,6 @@ int main(int argc, char** argv)
       for (i=0;i<winSize;++i) {
          if ( (nbytes = client.read((char*)&data,sizeof(data),1.0)) > 0) {
             printf("recv\tACK\t#%d\n", data.num);
-            #ifdef DEBUG
-            printf("nbytes = %d, data.buf = %s\n",nbytes,data.buf);
-            #endif
             if (data.num == oldestPKG ) {
                // Normal transmission
                oldestPKG = data.num + 1;
@@ -64,8 +63,7 @@ int main(int argc, char** argv)
          }
       }
       if (!loss) {
-         // winSize = (winSize >= threshold)? winSize+1 : winSize*2;
-         winSize = (winSize >= threshold)? winSize : winSize*2;
+         winSize = (winSize >= threshold)? winSize+1 : winSize*2;
       } else {
          threshold = (winSize > 1)? (winSize / 2) : 1;
          winSize = 1;

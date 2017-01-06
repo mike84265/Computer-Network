@@ -62,7 +62,7 @@ typedef struct
 class Buffer
 {
  public:
-   Buffer() : _size(0) {_data[0].num=0;}
+   Buffer();
    ~Buffer() {}
    Data& operator[] (int i) { return _data[i]; }
    const Data& operator[] (int i) const { return _data[i]; }

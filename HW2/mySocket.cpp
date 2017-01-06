@@ -122,10 +122,18 @@ int myClient::write(const char* buf, size_t len) const
    return ::sendto(_sockFd, buf, len, 0, (struct sockaddr*)&_serverAddress, sizeof(_serverAddress));
 }
 
+Buffer::Buffer() : _size(0)
+{
+   _data[0].num = 0;
+   for (int i=0;i<BUFFER_SIZE;++i)
+      strcpy(_data[i].buf,"\0");
+}
 void Buffer::clear()
 {
    _data[0].num = _data[_size-1].num + 1;
    _size = 0;
+   for (int i=0;i<BUFFER_SIZE;++i)
+      strcpy(_data[i].buf,"\0");
    fprintf(stderr,"buffer is cleared. _data[0].num is set to %d\n",_data[0].num);
 }
 
@@ -135,10 +143,10 @@ int Buffer::push(const Data& data)
    if ( ( n = data.num - _data[0].num) >= BUFFER_SIZE)
       return -2;
    else {
-      if (_data[n].num == data.num && data.num != 0)
+      if (strcmp(_data[n].buf,"\0") != 0)
          return -1;
-      else 
-         _data[n] = data;
+      else
+         memcpy(&_data[n],&data,sizeof(Data));
    }
    ++_size;
    return 0;

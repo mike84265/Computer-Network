@@ -34,6 +34,12 @@ int main(int argc, char** argv)
          // Final
          sprintf(data.buf,"ACK Final");
          client.write((char*)&data,sizeof(data));
+         printf("recv\tFINAL\n");
+         printf("send\tACK\tFINAL\n");
+         int i;
+         for (i=0;i<buffer.size()-1;++i)
+            write(fd,buffer[i].buf,PACKET_SIZE);
+         write(fd,buffer[i].buf,strlen(buffer[i].buf));
          return 0;
       }
       switch(buffer.push(data)) {
@@ -52,7 +58,7 @@ int main(int argc, char** argv)
        case -2: // Buffer overflow
          printf("drop\tdata\t#%d\n",data.num);
          for (int i=0;i<buffer.size();++i)
-            write(fd,buffer[i].buf,strlen(buffer[i].buf));
+            write(fd,buffer[i].buf,PACKET_SIZE);
          buffer.clear();
          printf("flush\n");
       }
