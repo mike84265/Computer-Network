@@ -8,7 +8,7 @@
 #include <netdb.h>
 #include <sys/select.h>
 
-#define PACKET_SIZE 128
+#define PACKET_SIZE 1024
 #define BUFFER_SIZE 32
 
 class myServer

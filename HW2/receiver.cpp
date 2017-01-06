@@ -28,7 +28,7 @@ int main(int argc, char** argv)
    // Shake hand to establish connection with the agent.
    strcpy(buf, "Hello Server\n");
    client.write(buf,strlen(buf));
-   assert(client.read(buf,sizeof(buf)) >= 0);
+   assert(client.read(buf,sizeof(buf),-1) >= 0);
    while ( (nbytes = client.read((char*)&data, sizeof(data))) > 0) {
       if (data.num == -1) {
          // Final
@@ -47,12 +47,14 @@ int main(int argc, char** argv)
          client.write((char*)&data,sizeof(data));
          printf("recv\tdata\t#%d\n",data.num);
          printf("send\tACK\t#%d\n",data.num);
+         printf("size = %d\n",buffer.size());
          break;
        case -1: // Repeat PKG
          sprintf(data.buf,"ACK %d", data.num);
          client.write((char*)&data,sizeof(data));
          printf("ignr\tdata\t#%d\n",data.num);
          printf("send\tACK\t#%d\n",data.num);
+         printf("size = %d\n",buffer.size());
          break;
        case -2: // Buffer overflow
          printf("drop\tdata\t#%d\n",data.num);

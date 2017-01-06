@@ -33,7 +33,6 @@ int main(int argc, char** argv)
    while(1) {
       for (i=0;i<winSize;++i) {
          nbytes = read(fd, data.buf, sizeof(data.buf));
-         printf("nbytes = %d\n",nbytes);
          data.nbytes = nbytes;
          data.num = num++; 
          client.write((char*)&data, nbytes + sizeof(int));
@@ -71,6 +70,7 @@ int main(int argc, char** argv)
          winSize = 1;
          lseek(fd,oldestPKG * PACKET_SIZE,SEEK_SET);
          num = oldestPKG;
+         printf("time\tout,\t\tthreshold = %d\n",threshold);
       }
    }
    data.num = -1;

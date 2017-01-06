@@ -1,4 +1,5 @@
 #include "mySocket.h"
+#include <assert.h>
 #include <string.h>
 #define ERR_EXIT(str)         \
    { fprintf(stderr,"%s",(str)); exit(1); }
@@ -126,14 +127,14 @@ Buffer::Buffer() : _size(0)
 {
    _data[0].num = 0;
    for (int i=0;i<BUFFER_SIZE;++i)
-      strcpy(_data[i].buf,"\0");
+      _data[i].nbytes = 0;
 }
 void Buffer::clear()
 {
    _data[0].num = _data[_size-1].num + 1;
    _size = 0;
    for (int i=0;i<BUFFER_SIZE;++i)
-      strcpy(_data[i].buf,"\0");
+      _data[i].nbytes = 0;
    fprintf(stderr,"buffer is cleared. _data[0].num is set to %d\n",_data[0].num);
 }
 
@@ -142,12 +143,14 @@ int Buffer::push(const Data& data)
    int n;
    if ( ( n = data.num - _data[0].num) >= BUFFER_SIZE)
       return -2;
+   else if (n < 0)
+      return -1;
    else {
-      if (strcmp(_data[n].buf,"\0") != 0)
+      if (_data[n].nbytes != 0)
          return -1;
       else
          memcpy(&_data[n],&data,sizeof(Data));
    }
-   ++_size;
+   assert(++_size <= BUFFER_SIZE);
    return 0;
 }
