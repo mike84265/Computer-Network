@@ -48,12 +48,8 @@ int myServer::read(char* buf, size_t len, double timeout) const
    } else
       n = select(_listenFd+1,&_rset,NULL,NULL,NULL);
    if (n == 0)
-       return 0;
+       return -1;
    nbytes = ::recvfrom(_listenFd, buf, len, 0, (struct sockaddr*)&_clientAddress, &length); 
-   #ifdef DEBUG
-   fprintf(stderr,"Received data from %s : %d\n", inet_ntoa(_clientAddress.sin_addr), htons(_clientAddress.sin_port));
-   fprintf(stderr,"%s\n",buf);
-   #endif
    return nbytes;
 }
 
@@ -99,18 +95,51 @@ void myClient::initSocket()
    bcopy(_hp->h_addr_list[0], (caddr_t)&_serverAddress.sin_addr, _hp->h_length);
 }
 
-int myClient::read(char* buf, size_t len) const
+int myClient::read(char* buf, size_t len, double timeout) const
 {
    socklen_t size = sizeof(_serverAddress);
+   int n;
+   struct timeval tv;
+
+   FD_ZERO(&_rset);
+   FD_SET(_sockFd, &_rset);
+
+   if (timeout >= 0) {
+      tv.tv_sec = int(timeout);
+      tv.tv_usec = int(timeout * 1000000) % 1000000;
+      n = select(_sockFd+1,&_rset,NULL,NULL,&tv);
+   } else
+      n = select(_sockFd+1,&_rset,NULL,NULL,NULL);
+   if (n == 0)
+       return -1;
+
    int nbytes = recvfrom(_sockFd, buf, len, 0, (struct sockaddr*)&_serverAddress, &size);
-   #ifdef DEBUG
-   fprintf(stderr,"Got %d bytes from server.\n", nbytes);
-   fprintf(stderr,"%s\n",buf);
-   #endif
    return nbytes;
 }
 
 int myClient::write(const char* buf, size_t len) const
 {
    return ::sendto(_sockFd, buf, len, 0, (struct sockaddr*)&_serverAddress, sizeof(_serverAddress));
+}
+
+void Buffer::clear()
+{
+   _data[0].num = _data[_size-1].num + 1;
+   _size = 0;
+   fprintf(stderr,"buffer is cleared. _data[0].num is set to %d\n",_data[0].num);
+}
+
+int Buffer::push(const Data& data)
+{
+   int n;
+   if ( ( n = data.num - _data[0].num) >= BUFFER_SIZE)
+      return -2;
+   else {
+      if (_data[n].num == data.num && data.num != 0)
+         return -1;
+      else 
+         _data[n] = data;
+   }
+   ++_size;
+   return 0;
 }

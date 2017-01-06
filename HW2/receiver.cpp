@@ -5,6 +5,7 @@
 #include "mySocket.h"
 #include <assert.h>
 #include <string.h>
+#include <array>
 using namespace std;
 int main(int argc, char** argv)
 {
@@ -21,16 +22,39 @@ int main(int argc, char** argv)
    }
 
    int nbytes;
-   char buf[BUFSIZE];
+   char buf[512];
    Data data;
+   Buffer buffer;
+   // Shake hand to establish connection with the agent.
    strcpy(buf, "Hello Server\n");
    client.write(buf,strlen(buf));
    assert(client.read(buf,sizeof(buf)) >= 0);
    while ( (nbytes = client.read((char*)&data, sizeof(data))) > 0) {
-      write(fd, data.buf, nbytes-sizeof(int));
-      sprintf(data.buf,"ACK %d", data.num);
-      client.write((char*)&data,sizeof(data));
-      printf("recv\tdata\t#%d\n",data.num);
-      printf("send\tACK\t#%d\n",data.num);
+      if (data.num == -1) {
+         // Final
+         sprintf(data.buf,"ACK Final");
+         client.write((char*)&data,sizeof(data));
+         return 0;
+      }
+      switch(buffer.push(data)) {
+       case 0: // Normal
+         sprintf(data.buf,"ACK %d", data.num);
+         client.write((char*)&data,sizeof(data));
+         printf("recv\tdata\t#%d\n",data.num);
+         printf("send\tACK\t#%d\n",data.num);
+         break;
+       case -1: // Repeat PKG
+         sprintf(data.buf,"ACK %d", data.num);
+         client.write((char*)&data,sizeof(data));
+         printf("ignr\tdata\t#%d\n",data.num);
+         printf("send\tACK\t#%d\n",data.num);
+         break;
+       case -2: // Buffer overflow
+         printf("drop\tdata\t#%d\n",data.num);
+         for (int i=0;i<buffer.size();++i)
+            write(fd,buffer[i].buf,strlen(buffer[i].buf));
+         buffer.clear();
+         printf("flush\n");
+      }
    }
 }

@@ -6,8 +6,10 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/select.h>
 
-#define BUFSIZE 128
+#define PACKET_SIZE 128
+#define BUFFER_SIZE 32
 
 class myServer
 {
@@ -19,6 +21,7 @@ class myServer
    int write(const char* buf, size_t len) const;
    void initSocket();
    void close() { ::close(_listenFd); }
+   int filedes() const { return _listenFd; }
  private:
    // Socket:
    struct sockaddr_in      _serverAddress;
@@ -27,7 +30,6 @@ class myServer
    unsigned                _port;
    int                     _listenFd;
    mutable fd_set          _rset;
-   mutable fd_set          _wset;
 };
 
 class myClient
@@ -36,7 +38,7 @@ class myClient
    myClient();
    myClient(const char* hostname, const char* port);
    ~myClient();
-   int read(char* buf, size_t len) const;
+   int read(char* buf, size_t len, double timeout=3) const;
    int write(const char* buf, size_t len) const;
    void initSocket();
    void close() { ::close(_sockFd); }
@@ -47,10 +49,30 @@ class myClient
    int                     _sockFd;
    int                     _port;
    struct hostent*         _hp;
+   mutable fd_set          _rset;
 };
 
 typedef struct
 {
    int num;
-   char buf[BUFSIZE];
+   char buf[PACKET_SIZE];
 } Data;
+
+
+class Buffer
+{
+ public:
+   Buffer() : _size(0) {_data[0].num=0;}
+   ~Buffer() {}
+   Data& operator[] (int i) { return _data[i]; }
+   const Data& operator[] (int i) const { return _data[i]; }
+   size_t size() const { return _size; }
+   bool full() const { return (_size >= BUFFER_SIZE); }
+   bool empty() const { return (_size == 0); }
+   void clear();
+   int push(const Data& data);
+
+ private:
+   Data                    _data[BUFFER_SIZE];
+   size_t                  _size;
+};

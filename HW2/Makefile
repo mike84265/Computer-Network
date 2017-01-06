@@ -1,5 +1,5 @@
-CFLAGS = -std=c++11 -Wall -g -DDEBUG
 CFLAGS = -std=c++11 -Wall -O3
+CFLAGS = -std=c++11 -Wall -g -DDEBUG
 CXX = g++
 
 main:

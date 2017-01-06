@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "mySocket.h"
 #include <assert.h>
+#include <fcntl.h>
 #include <string.h>
 using namespace std;
 int main(int argc, char** argv)
@@ -21,18 +22,63 @@ int main(int argc, char** argv)
    }
 
    int nbytes;
-   char buf[BUFSIZE];
+   char buf[512];
+   int threshold=16, winSize=1, oldestPKG=0;
    Data data;
+   // Shake hand to establish connection with the agent.
    strcpy(buf, "Hello Server\n");
    client.write(buf,strlen(buf));
-   assert(client.read(buf,sizeof(buf)) >= 0);
-   int num = 0;
-   while ( (nbytes = read(fd, data.buf, sizeof(data.buf))) > 0) {
-      data.num = ++num; 
-      client.write((char*)&data, nbytes + sizeof(int));
-      printf("send\tdata\t#%d\n", num);
-      client.read((char*)&data,sizeof(data));
-      printf("recv\tACK\t#%d\n", data.num);
+   assert(client.read(buf,sizeof(buf),-1) >= 0);
+   int num = 0, i=0, final=0;
+   while(1) {
+      for (i=0;i<winSize;++i) {
+         nbytes = read(fd, data.buf, sizeof(data.buf));
+         data.num = num++; 
+         client.write((char*)&data, nbytes + sizeof(int));
+         printf("send\tdata\t#%d\twinSize=%d\n",data.num,winSize);
+         if (nbytes <= 0) {
+            winSize = i+1;
+            printf("final, winSize changed to %d\n",winSize);
+            final = 1;
+            break;
+         }
+      }
+      bool loss = false;
+      for (i=0;i<winSize;++i) {
+         if ( (nbytes = client.read((char*)&data,sizeof(data),1.0)) > 0) {
+            printf("recv\tACK\t#%d\n", data.num);
+            #ifdef DEBUG
+            printf("nbytes = %d, data.buf = %s\n",nbytes,data.buf);
+            #endif
+            if (data.num == oldestPKG ) {
+               // Normal transmission
+               oldestPKG = data.num + 1;
+            } else {
+               // Package lost
+               loss = true;
+            }
+         } else {
+            // No response from receiver.
+            loss = true;
+            break;
+         }
+      }
+      if (!loss) {
+         // winSize = (winSize >= threshold)? winSize+1 : winSize*2;
+         winSize = (winSize >= threshold)? winSize : winSize*2;
+      } else {
+         threshold = (winSize > 1)? (winSize / 2) : 1;
+         winSize = 1;
+         lseek(fd,oldestPKG * PACKET_SIZE,SEEK_SET);
+         num = oldestPKG;
+      }
+      if (final)
+         break;
    }
+   data.num = -1;
+   strcpy(data.buf,"FINAL");
+   client.write((char*)&data,sizeof(data));
+   client.read((char*)&data,sizeof(data),-1);
+   printf("recv\tACK\tFINAL\n");
    client.write(buf,0);
 }
