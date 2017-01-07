@@ -135,7 +135,9 @@ void Buffer::clear()
    _size = 0;
    for (int i=0;i<BUFFER_SIZE;++i)
       _data[i].nbytes = 0;
+   #ifdef DEBUG
    fprintf(stderr,"buffer is cleared. _data[0].num is set to %d\n",_data[0].num);
+   #endif
 }
 
 int Buffer::push(const Data& data)

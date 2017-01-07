@@ -80,6 +80,7 @@ int main(int argc, char** argv)
    data.num = -1;
    strcpy(data.buf,"FINAL");
    client.write((char*)&data,sizeof(data));
+   printf("send\tFINAL\n");
    client.read((char*)&data,sizeof(data),-1);
    printf("recv\tACK\tFINAL\n");
    client.write(buf,0);

@@ -38,7 +38,7 @@ class myClient
    myClient();
    myClient(const char* hostname, const char* port);
    ~myClient();
-   int read(char* buf, size_t len, double timeout=3) const;
+   int read(char* buf, size_t len, double timeout=5) const;
    int write(const char* buf, size_t len) const;
    void initSocket();
    void close() { ::close(_sockFd); }
