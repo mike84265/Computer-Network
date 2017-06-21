@@ -7,11 +7,16 @@
 myServer::myServer() : _port(9990)
 {
    gethostname(_hostname, sizeof(_hostname));
-   initSocket();
 }
 
 myServer::myServer(const char* port) : _port(atoi(port))
 {
+   gethostname(_hostname, sizeof(_hostname));
+}
+
+void myServer::init(const char* port)
+{
+   _port = atoi(port);
    gethostname(_hostname, sizeof(_hostname));
    initSocket();
 }

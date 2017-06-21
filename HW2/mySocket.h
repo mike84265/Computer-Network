@@ -19,10 +19,11 @@ class myServer
    ~myServer();
    int read(char* buf, size_t len, double timeout=5) const;
    int write(const char* buf, size_t len) const;
-   void initSocket();
+   void init(const char* port);
    void close() { ::close(_listenFd); }
    int filedes() const { return _listenFd; }
  private:
+   void initSocket();
    // Socket:
    struct sockaddr_in      _serverAddress;
    struct sockaddr_in      _clientAddress;
